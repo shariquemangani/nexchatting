@@ -12,11 +12,11 @@ const ChatPage = () => {
   useEffect(() => {
     setLoading(true);
     const messagesRef = ref(db, "messages");
-
     const getallMessage = onValue(messagesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         setMessages(Object.values(data));
+        console.log(Object.values(data));
       } else {
         setMessages([]);
       }
@@ -25,6 +25,7 @@ const ChatPage = () => {
 
     return () => getallMessage();
   }, []);
+  // console.log(auth.currentUser?.displayName);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
@@ -44,11 +45,11 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold mb-6">Chat</h1>
-      <div className="">
+    <div className="h-screen p-[20px] flex flex-col justify-between gap-[20px]">
+      <h1 className="text-[30px] font-bold">Chat</h1>
+      <div className=" h-full overflow-y-scroll">
         {loading ? (
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center h-full">
             <Spinner size="xl" />
           </div>
         ) : (
@@ -58,11 +59,14 @@ const ChatPage = () => {
                 key={i}
                 className={`p-3 rounded-lg ${
                   msg.uid === auth.currentUser?.uid
-                    ? "bg-blue-500 text-white ml-auto"
+                    ? "bg-[#ddd] text-black ml-auto"
                     : "bg-gray-200"
                 } max-w-xs`}
               >
-                <p>{msg.text}</p>
+                <p className="font-light text-[10px]">
+                  {msg.uid === auth.currentUser?.uid && msg.displayName}
+                </p>
+                <p className="w-full text-wrap overflow-hidden">{msg.text}</p>
               </div>
             ))}
           </div>
@@ -77,7 +81,10 @@ const ChatPage = () => {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
-        <Button color="gradient" onPress={handleSendMessage}>
+        <Button
+          onPress={handleSendMessage}
+          className="bg-[#b9b9b9] font-semibold"
+        >
           Send
         </Button>
       </div>

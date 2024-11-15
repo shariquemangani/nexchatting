@@ -3,30 +3,44 @@ import { useState } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const Auth = () => {
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between sign-up and sign-in
+  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous error
+    setError("");
 
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const register = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        await updateProfile(register.user, {
+          displayName: displayName,
+        });
+
+        console.log("User registered:", register);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const sign = await signInWithEmailAndPassword(auth, email, password);
+        console.log("User signed in:", sign.user);
       }
-      router.push("/chat"); // Redirect to chat page after successful login or signup
+
+      router.push("/chat");
     } catch (error) {
-      setError(error.message); // Display error message
+      setError(error.message);
     }
   };
 
@@ -36,7 +50,16 @@ const Auth = () => {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg shadow-lg w-80"
       >
-        <h2 className="text-2xl mb-4">{isSignUp ? "Sign Up" : "Sign In"}</h2>
+        <h2 className="text-[35px] font-semibold mb-4">
+          {isSignUp ? "Sign Up" : "Sign In"}
+        </h2>
+        <input
+          type="text"
+          placeholder="Name"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          className="mb-4 p-2 w-full border rounded-md"
+        />
         <input
           type="email"
           placeholder="Email"
