@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../lib/firebaseConfig";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@nextui-org/react";
 
 const Auth = () => {
   const [displayName, setDisplayName] = useState("");
@@ -14,9 +15,11 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setError("");
 
@@ -36,10 +39,13 @@ const Auth = () => {
       } else {
         const sign = await signInWithEmailAndPassword(auth, email, password);
         console.log("User signed in:", sign.user);
+        setLoading(false);
       }
 
+      setLoading(false);
       router.push("/chat");
     } catch (error) {
+      setLoading(false);
       setError(error.message);
     }
   };
@@ -76,9 +82,17 @@ const Auth = () => {
         />
         <button
           type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded-md"
+          className="w-full p-2 h-[40px] bg-blue-500 text-white rounded-md"
         >
-          {isSignUp ? "Sign Up" : "Sign In"}
+          {loading ? (
+            <div className="flex justify-center items-center h-full">
+              <Spinner size="sm" color="white" />
+            </div>
+          ) : isSignUp ? (
+            "Sign Up"
+          ) : (
+            "Sign In"
+          )}
         </button>
         <button
           type="button"
