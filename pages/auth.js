@@ -5,13 +5,16 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { auth } from "../lib/firebaseConfig";
+import { auth, db } from "../lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@nextui-org/react";
+import { ref, set } from "firebase/database";
+import { setCookie } from "cookies-next";
 
 const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [number, setNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +25,12 @@ const Auth = () => {
     setLoading(true);
     e.preventDefault();
     setError("");
+
+    if (!email || !password || (isSignUp && !displayName)) {
+      setError("Please fill all required fields.");
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isSignUp) {
@@ -35,18 +44,41 @@ const Auth = () => {
           displayName: displayName,
         });
 
+        await set(ref(db, "users/" + register.user.uid), {
+          phoneNumber: number,
+          email: email,
+        });
+
         console.log("User registered:", register);
+
+        setCookie("isLoggedIn", "true", { maxAge: 60 * 60 * 24 * 7 });
+
+        router.push("/chats");
       } else {
         const sign = await signInWithEmailAndPassword(auth, email, password);
         console.log("User signed in:", sign.user);
-        setLoading(false);
+
+        setCookie("isLoggedIn", "true", { maxAge: 60 * 60 * 24 * 7 });
+
+        router.push("/chats");
       }
 
       setLoading(false);
-      router.push("/chat");
     } catch (error) {
       setLoading(false);
-      setError(error.message);
+      console.log("Error during authentication:", error.message);
+
+      const errorMessages = {
+        "auth/invalid-email": "Please enter a valid email.",
+        "auth/user-disabled": "Your account has been disabled.",
+        "auth/user-not-found": "No user found with this email.",
+        "auth/wrong-password": "Incorrect password.",
+        "auth/email-already-in-use": "This email is already registered.",
+      };
+
+      setError(
+        errorMessages[error.code] || "An error occurred. Please try again."
+      );
     }
   };
 
@@ -59,13 +91,15 @@ const Auth = () => {
         <h2 className="text-[35px] font-semibold mb-4">
           {isSignUp ? "Sign Up" : "Sign In"}
         </h2>
-        <input
-          type="text"
-          placeholder="Name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="mb-4 p-2 w-full border rounded-md"
-        />
+        {isSignUp && (
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="mb-4 p-2 w-full border rounded-md"
+          />
+        )}
         <input
           type="email"
           placeholder="Email"
@@ -73,6 +107,15 @@ const Auth = () => {
           onChange={(e) => setEmail(e.target.value)}
           className="mb-4 p-2 w-full border rounded-md"
         />
+        {isSignUp && (
+          <input
+            type="number"
+            placeholder="Phone Number"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            className="mb-4 p-2 w-full border rounded-md"
+          />
+        )}
         <input
           type="password"
           placeholder="Password"
@@ -83,6 +126,7 @@ const Auth = () => {
         <button
           type="submit"
           className="w-full p-2 h-[40px] bg-blue-500 text-white rounded-md"
+          disabled={loading}
         >
           {loading ? (
             <div className="flex justify-center items-center h-full">
@@ -103,8 +147,7 @@ const Auth = () => {
             ? "Already have an account? Sign In"
             : "Don't have an account? Sign Up"}
         </button>
-        {error && <p className="text-red-500 mt-4">{error}</p>}{" "}
-        {/* Display error message */}
+        {error && <p className="text-red-500 mt-4">{error}</p>}
       </form>
     </div>
   );
