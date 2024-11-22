@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@nextui-org/react": "^2.4.8",
+    "animate.css": "^4.1.1",
     "cookies-next": "^5.0.2",
     "firebase": "^11.0.2",
     "firebase-admin": "^13.0.1",

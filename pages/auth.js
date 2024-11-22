@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../lib/firebaseConfig";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import { ref, set } from "firebase/database";
 import { setCookie } from "cookies-next";
 
@@ -83,12 +83,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#3b3e46]">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-80"
+        className="bg-[#23262f] p-8 rounded-lg shadow-lg w-80"
       >
-        <h2 className="text-[35px] font-semibold mb-4">
+        <h2 className="text-[35px] text-[#fff] font-semibold mb-4">
           {isSignUp ? "Sign Up" : "Sign In"}
         </h2>
         {isSignUp && (
@@ -97,7 +97,7 @@ const Auth = () => {
             placeholder="Full Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="mb-4 p-2 w-full border rounded-md"
+            className="mb-4 p-2 w-full border rounded-md bg-[#3b3e46] border-[#dddddd60] text-[#fff] outline-none"
           />
         )}
         <input
@@ -105,7 +105,7 @@ const Auth = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 p-2 w-full border rounded-md"
+          className="mb-4 p-2 w-full border rounded-md bg-[#3b3e46] border-[#dddddd60] text-[#fff] outline-none"
         />
         {isSignUp && (
           <input
@@ -113,7 +113,7 @@ const Auth = () => {
             placeholder="Phone Number"
             value={number}
             onChange={(e) => setNumber(e.target.value)}
-            className="mb-4 p-2 w-full border rounded-md"
+            className="mb-4 p-2 w-full border rounded-md bg-[#3b3e46] border-[#dddddd60] text-[#fff] outline-none"
           />
         )}
         <input
@@ -121,11 +121,11 @@ const Auth = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 p-2 w-full border rounded-md"
+          className="mb-4 p-2 w-full border rounded-md bg-[#3b3e46] border-[#dddddd60] text-[#fff] outline-none"
         />
-        <button
+        <Button
           type="submit"
-          className="w-full p-2 h-[40px] bg-blue-500 text-white rounded-md"
+          className="w-full p-2 h-[40px] bg-[#2f80ed] text-[#fff] rounded-md"
           disabled={loading}
         >
           {loading ? (
@@ -137,16 +137,16 @@ const Auth = () => {
           ) : (
             "Sign In"
           )}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => setIsSignUp(!isSignUp)}
-          className="mt-4 text-blue-500"
+          className="mt-4 text-blue-500 bg-transparent"
         >
           {isSignUp
             ? "Already have an account? Sign In"
             : "Don't have an account? Sign Up"}
-        </button>
+        </Button>
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </form>
     </div>

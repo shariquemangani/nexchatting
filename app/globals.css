@@ -16,13 +16,17 @@
   }
 } */
 
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+
 body {
   /* color: var(--foreground);
   background: var(--background); */
   font-family: "Poppins", serif;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+
   * ::-webkit-scrollbar {
     display: none;
   }
