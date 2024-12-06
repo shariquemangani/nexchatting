@@ -12,7 +12,7 @@ import React, { useState } from "react";
 import { auth } from "@/lib/firebaseConfig";
 import { signOut } from "firebase/auth";
 
-const Sidebar = () => {
+const Sidebar = ({ userName }) => {
   const [sideOpen, setSideOpen] = useState(true);
   const [logOutLoader, setLogOutLoader] = useState(false);
   const pathName = usePathname();
@@ -22,10 +22,10 @@ const Sidebar = () => {
     setLogOutLoader(true);
     setTimeout(async () => {
       try {
-        await signOut(auth); // Sign out using Firebase
+        await signOut(auth);
         document.cookie =
-          "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Clear the cookie
-        router.push("/"); // Redirect to login page
+          "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        router.push("/");
         setLogOutLoader(false);
       } catch (error) {
         console.error("Logout failed:", error);
@@ -39,7 +39,7 @@ const Sidebar = () => {
         sideOpen && sideOpen
           ? "min-w-[200px] w-[200px]"
           : "min-w-[30px] w-[62px]"
-      } h-full bg-[#23262f] rounded-[20px] py-[20px]  text-[white] flex flex-col justify-between [transition:0.5s] relative`}
+      } h-full bg-[#23262f] rounded-[20px] py-[20px]  text-[white] flex flex-col justify-between [transition:0.5s] relative animate__animated  animate__fadeIn`}
     >
       <Button
         className="min-w-[25px] w-[25px] h-[25px] rounded-[8px] p-0 bg-[#54565d] absolute bottom-[100px] right-[-10px] [box-shadow:0px_0px_10px_0px_#272727]"
@@ -47,6 +47,7 @@ const Sidebar = () => {
       >
         <Image
           src={leftArrow}
+          height={100}
           width={17}
           alt="Left arrow"
           className={`[transition:0.5s] ${
@@ -71,7 +72,7 @@ const Sidebar = () => {
                 : "animate__fadeOutRight"
             } animate__animated animate__faster `}
           >
-            Sharique M.
+            {userName}
           </p>
           {/* )} */}
         </div>
