@@ -7,7 +7,7 @@ import {
   Tab,
   Tabs,
 } from "@nextui-org/react";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import fourSquare from "@/public/icons/fourSquare.svg";
 import user from "@/public/icons/user.svg";
@@ -34,10 +34,9 @@ import {
 import UserContext from "@/context/userContext";
 import { getAlluser, getUserData } from "@/api/userApi";
 import { CommonModal } from "@/components/commonModal";
-import { users } from "@/utils/usersData";
 
 const Chats = () => {
-  let { loggedInUser, setLoggedInUser } = useContext(UserContext);
+  let { loggedInUser, setLoggedInUser, users } = useContext(UserContext);
   const [messageLoading, setMessageLoading] = useState(true);
   const [selectedUserData, setSelectedUserData] = useState([]);
   const [chatListUser, setChatListUser] = useState();
@@ -45,6 +44,14 @@ const Chats = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState();
   const [allUser, setAllUser] = useState();
+  const messagesEndRef = useRef(null);
+
+  // Scroll to the bottom smoothly whenever userChats updates
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [userChats]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -153,6 +160,8 @@ const Chats = () => {
       }
     }
   };
+
+  console.log("chatListUser", chatListUser);
 
   return (
     <div className=" h-full flex flex-col gap-[20px] animate__animated  animate__fadeIn">
@@ -312,43 +321,48 @@ const Chats = () => {
                     </h1>
                   </div>
                 ) : (
-                  <div className=" flex flex-col gap-[10px] animate__animated animate__fadeIn ">
+                  <div className="flex flex-col gap-[10px] animate__animated animate__fadeIn">
                     {chatListUser &&
-                      chatListUser?.map((user, i) => (
-                        <Button
-                          className="hover:bg-[#3b3e46] bg-transparent rounded-[5px] text-[#fff] h-[fit-content] p-[10px] flex items-center justify-start text-left gap-[10px]"
-                          key={user.id}
-                          onClick={() => {
-                            if (!loggedInUser) {
-                              console.error("loggedInUser is undefined");
-                              return;
-                            }
-                            setSelectedUserData(user);
-                            setMessageLoading(false);
-                            // handleClickedChat(user);
-                          }}
-                        >
-                          <Avatar
-                            alt={user.fullName}
-                            className="flex-shrink-0"
-                            size="sm"
-                            src={`https://d2u8k2ocievbld.cloudfront.net/memojis/male/${
-                              i + 1
-                            }.png`}
-                          />
-                          <p className="flex flex-col gap-1">
-                            <span className="font-medium">
-                              {user.name || "Unknown User"}
-                            </span>
-                            {/* Uncomment for message preview */}
-                            {/* <span className="text-gray-400 text-sm">
-                              {userChats && userChats.length > 0
-                                ? userChats[userChats.length - 1].message
-                                : "No messages yet"}
-                            </span> */}
-                          </p>
-                        </Button>
-                      ))}
+                      chatListUser.map((e, i) => {
+                        let name = e?.name;
+                        const onlineStatus = users[name]?.state === "online";
+                        return (
+                          <Button
+                            className="hover:bg-[#3b3e46] bg-transparent rounded-[5px] text-[#fff] h-[fit-content] p-[10px] flex items-center justify-between text-left gap-[10px]"
+                            key={e.id}
+                            onClick={() => {
+                              if (!loggedInUser) {
+                                console.error("loggedInUser is undefined");
+                                return;
+                              }
+                              setSelectedUserData(e);
+                              setMessageLoading(false);
+                              // handleClickedChat(user);
+                            }}
+                          >
+                            <div className="flex items-center justify-start text-left gap-[10px]">
+                              <Avatar
+                                alt={e.fullName}
+                                className="flex-shrink-0"
+                                size="sm"
+                                src={`https://d2u8k2ocievbld.cloudfront.net/memojis/male/${
+                                  i + 1
+                                }.png`}
+                              />
+                              <p className="flex flex-col gap-1">
+                                <span className="font-medium">
+                                  {e.name || "Unknown User"}
+                                </span>
+                              </p>
+                            </div>
+                            <p
+                              className={`w-[10px] h-[10px] rounded-[50%] ${
+                                onlineStatus ? "bg-[#3cff00]" : "bg-gray-500"
+                              }`}
+                            ></p>
+                          </Button>
+                        );
+                      })}
                   </div>
                 )}
               </Tab>
@@ -432,20 +446,22 @@ const Chats = () => {
                   </div>
                 </div>
                 <div className="h-[calc(100%-80px)] text-[#fff] animate__animated animate__fadeIn bg-[#3b3e46] rounded-[20px]">
-                  <div className="  h-[calc(100%-80px)] overflow-y-scroll flex flex-col gap-[10px] p-[10px]">
+                  <div className="h-[calc(100%-80px)] overflow-y-scroll overflow-x-hidden flex flex-col gap-[10px] p-[10px]">
                     {userChats &&
                       userChats?.map((msg, idx) => (
                         <div
                           key={idx}
                           className={`w-fit p-[10px] rounded-[10px] bg-[#23262f] 
-                          ${msg.senderId === loggedInUser.id ? "ms-auto" : ""}`}
+            ${msg.senderId === loggedInUser.id ? "ms-auto" : ""}`}
                         >
                           <p>{msg.message}</p>
                           {/* <span>
-                            {new Date(msg.timestamp).toLocaleTimeString()}
-                          </span> */}
+              {new Date(msg.timestamp).toLocaleTimeString()}
+            </span> */}
                         </div>
                       ))}
+                    {/* Add a div to act as the scroll-to anchor */}
+                    <div ref={messagesEndRef} />
                   </div>
                   <div className=" h-[80px] flex items-center gap-[10px] p-[20px]">
                     <input

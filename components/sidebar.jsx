@@ -8,15 +8,16 @@ import logout from "@/public/icons/logout.svg";
 import leftArrow from "@/public/icons/leftArrow.svg";
 import user from "@/public/icons/user.svg";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { auth } from "@/lib/firebaseConfig";
 import { signOut } from "firebase/auth";
+import UserContext from "@/context/userContext";
 
-const Sidebar = ({ userName }) => {
+const Sidebar = ({ userName, onLogout }) => {
   const [sideOpen, setSideOpen] = useState(true);
-  const [logOutLoader, setLogOutLoader] = useState(false);
   const pathName = usePathname();
   const router = useRouter();
+  let { logOutLoader, setLogOutLoader } = useContext(UserContext);
 
   const handleLogout = () => {
     setLogOutLoader(true);
@@ -38,7 +39,7 @@ const Sidebar = ({ userName }) => {
       className={`${
         sideOpen && sideOpen
           ? "min-w-[200px] w-[200px]"
-          : "min-w-[30px] w-[62px]"
+          : "min-w-[62px] w-[62px]"
       } h-full bg-[#23262f] rounded-[20px] py-[20px]  text-[white] flex flex-col justify-between [transition:0.5s] relative animate__animated  animate__fadeIn`}
     >
       <Button
@@ -113,7 +114,7 @@ const Sidebar = ({ userName }) => {
       <div className="px-[5px]">
         <Button
           className="w-full bg-transparent hover:bg-[#a0a0a020] text-[#fff] flex items-center justify-start gap-[15px] min-w-[10px]"
-          onClick={() => handleLogout()}
+          onClick={onLogout}
         >
           <span className="w-[20px] flex items-center justify-center">
             {logOutLoader ? (
